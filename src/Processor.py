@@ -90,15 +90,14 @@ class Processor:
         else:
             raise Exception("Sorry, process for %s method not implemented yet!" % self.args.controlnetMethod)
         
-    def main(self, inputImage:np.array) -> np.array:
+    def main(self, inputImage:np.array, prompt:str) -> np.array:
         
         self.inputImage = inputImage
         
         processedImage = self.processImage()
         
         outputImage = self.stableDiffusionModel(
-            # "scandinavian style interior design, high resolution, cozy atmosphere, Living room, photorealistic",
-            "bohemian style interior design, high resolution, cozy atmosphere, Living room, photorealistic",
+            prompt,
             num_inference_steps=50,
             generator=self.generator,
             image=processedImage

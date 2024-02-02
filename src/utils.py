@@ -6,13 +6,35 @@ from enum import Enum
 from io import BytesIO
 
 def processCanny(inputImage:np.array) -> Image:
+    """
+    It processes the incoming input image with the CannyEdge algorithm.
+    It prepares it as output to be given as input to ControlNet.
+
+    Args:
+        inputImage (np.array): It is the image in RGB format that the user gives as input.
+
+    Returns:
+        Image: Processed image to be used as input to ControlNet.
+    """
     image = cv2.Canny(inputImage, 100, 200)
     image = image[:, :, None]
     image = np.concatenate([image, image, image], axis=2)
     cannyImage = Image.fromarray(image)
     return cannyImage
 
-def processSegmentation(inputImage:np.array, imageProcessor, imageSegmentator):
+def processSegmentation(inputImage:np.array, imageProcessor, imageSegmentator) -> Image:
+    """
+    It processes the incoming input image with the SemanticSegmentation model.
+    It prepares it as output to be given as input to ControlNet.
+
+    Args:
+        inputImage (np.array): It is the image in RGB format that the user gives as input.
+        imageProcessor (transformers.AutoImageProcessor): Model taken from transformers.AutoImageProcessor
+        imageSegmentator (transformers.UperNetForSemanticSegmentation): Model taken from transformers.UperNetForSemanticSegmentation
+
+    Returns:
+        Image: Processed image to be used as input to ControlNet.
+    """
     inputImage_PIL = Image.fromarray(inputImage)
     pixelValues = imageProcessor(inputImage_PIL, return_tensors="pt").pixel_values
 
@@ -31,6 +53,17 @@ def processSegmentation(inputImage:np.array, imageProcessor, imageSegmentator):
     return segmentationImage
 
 def processDepth(inputImage:np.array, depthEstimator) -> Image:
+    """
+    It processes the incoming input image with the DepthEstimation model.
+    It prepares it as output to be given as input to ControlNet.
+
+    Args:
+        inputImage (np.array): It is the image in RGB format that the user gives as input.
+        depthEstimator (transformers.pipeline): Model taken from transformers.pipeline("depth-estimation")
+
+    Returns:
+        Image: Processed image to be used as input to ControlNet.
+    """
     image = depthEstimator(Image.fromarray(inputImage))['depth']
     image = np.array(image)
     image = image[:, :, None]
@@ -39,23 +72,67 @@ def processDepth(inputImage:np.array, depthEstimator) -> Image:
     return depthImage
 
 def processHED(inputImage:np.array, hedDetector) -> Image:
+    """
+    It processes the incoming input image with the HEDDetector model.
+    It prepares it as output to be given as input to ControlNet.
+
+    Args:
+        inputImage (np.array): It is the image in RGB format that the user gives as input.
+        hedDetector (controlnet_aux.HEDdetector): Model taken from controlnet_aux.HEDdetector.from_pretrained('lllyasviel/ControlNet')
+
+    Returns:
+        Image: Processed image to be used as input to ControlNet.
+    """
     hedImage = hedDetector(Image.fromarray(inputImage))
     return hedImage
 
+# from controlnet_aux import MLSDdetector
 def processMLSD(inputImage:np.array, mlsdDetector) -> Image:
+    """
+    It processes the incoming input image with the MLSDDetector model.
+    It prepares it as output to be given as input to ControlNet.
+
+    Args:
+        inputImage (np.array): It is the image in RGB format that the user gives as input.
+        mlsdDetector (controlnet_aux.MLSDdetector): Model taken from controlnet_aux.MLSDdetector.from_pretrained('lllyasviel/ControlNet')
+
+    Returns:
+        Image: _description_
+    """
     mlsdImage = mlsdDetector(Image.fromarray(inputImage))
     return mlsdImage
 
-def readImageFile(data):
+def readImageFile(data:bytes) -> np.array:
+    """
+    Converts the image sent by the user from byte format to np.array format.
+
+    Args:
+        data (bytes): Image sent by the user
+
+    Returns:
+        np.array: Converted image sent by the user
+    """
     image = Image.open(BytesIO(data))
     arrayImage = np.array(image)
     return arrayImage
 
-def processImageToReturn(image):
+def processImageToReturn(image:Image) -> bytes:
+    """
+    Converts the output image to be sent to the user from PIL.Image format to byte format.
+
+    Args:
+        image (Image): Output image of the Stable Diffusion model
+
+    Returns:
+        bytes: Stable Diffusion model output image in byte format to be sent to the user
+    """
     imgByteArray = BytesIO()
     image.save(imgByteArray, format="PNG")
     return imgByteArray.getvalue()
 
+
+# Prompt dictionary with prompts mapped according to the user's desired style. 
+# When a new style is to be added, it should be added to this dictionary.
 promptDict = {
     "scandinavian": "scandinavian forest cabin, log walls, reindeer hide rugs, northern wilderness escape",
     "hollywood": "Hollywood regency glamor, mirrored furniture, velvet upholstery, crystal chandeliers, classic elegance",
@@ -73,6 +150,8 @@ promptDict = {
     "cozy": "cozy coastal cottage room, white walls, nautical decor, wicker furniture, seaside retreat",
 }
 
+# Using Enum-based class for input in FastAPI ensures type safety and restricts user choices
+# to predefined options, enhancing code clarity and reducing potential errors.
 class Style(str, Enum):
     random = "random"
     scandinavian = "scandinavian"
@@ -90,6 +169,7 @@ class Style(str, Enum):
     retro = "retro"
     cozy = "cozy"
 
+# The palette used for colouring the SemanticSegmentation output according to the classes.
 palette = np.asarray([
     [0, 0, 0],
     [120, 120, 120],

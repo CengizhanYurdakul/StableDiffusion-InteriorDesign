@@ -1,4 +1,3 @@
-from concurrent.futures import process
 import cv2
 import torch
 import argparse
@@ -7,7 +6,7 @@ from src.Processor import Processor
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--stableDiffusionModelName", default="sd1.5", help="Specifies the model to be used as a Stable Diffusion")
-parser.add_argument("--controlnetMethod", default="canny", help="[canny - segmentation - depth - hed - mlsd] - Specifies which method to use in the ControlNet model")
+parser.add_argument("--controlnetMethod", default="depth", help="[canny - segmentation - depth - hed - mlsd] - Specifies which method to use in the ControlNet model")
 parser.add_argument("--dtype", default="fp16", help="Specifies which tensor type the models should be initialized")
 args = parser.parse_args()
 

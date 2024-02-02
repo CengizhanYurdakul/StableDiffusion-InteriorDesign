@@ -2,6 +2,8 @@ import cv2
 import torch
 import numpy as np
 from PIL import Image
+from enum import Enum
+from io import BytesIO
 
 def processCanny(inputImage:np.array) -> Image:
     image = cv2.Canny(inputImage, 100, 200)
@@ -44,6 +46,10 @@ def processMLSD(inputImage:np.array, mlsdDetector) -> Image:
     mlsdImage = mlsdDetector(Image.fromarray(inputImage))
     return mlsdImage
 
+def readImageFile(data):
+    image = Image.open(BytesIO(data))
+    return image
+
 promptDict = {
     "scandinavian": "scandinavian forest cabin, log walls, reindeer hide rugs, northern wilderness escape",
     "hollywood": "Hollywood regency glamor, mirrored furniture, velvet upholstery, crystal chandeliers, classic elegance",
@@ -60,6 +66,23 @@ promptDict = {
     "retro": "retro 50s room, checkered floors, chrome accents, vinyl booth seating, nostalgic dining experience",
     "cozy": "cozy coastal cottage room, white walls, nautical decor, wicker furniture, seaside retreat",
 }
+
+class Style(str, Enum):
+    random = "random"
+    scandinavian = "scandinavian"
+    hollywood = "hollywood"
+    victorian = "victorian"
+    urban = "urban"
+    coffeshop = "coffeshop"
+    cyberpunk = "cyberpunk"
+    nouveau = "nouveau"
+    egyptian = "egyptian"
+    french = "french"
+    moroccan = "moroccan"
+    deco = "deco"
+    italian = "italian"
+    retro = "retro"
+    cozy = "cozy"
 
 palette = np.asarray([
     [0, 0, 0],

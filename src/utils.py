@@ -48,7 +48,13 @@ def processMLSD(inputImage:np.array, mlsdDetector) -> Image:
 
 def readImageFile(data):
     image = Image.open(BytesIO(data))
-    return image
+    arrayImage = np.array(image)
+    return arrayImage
+
+def processImageToReturn(image):
+    imgByteArray = BytesIO()
+    image.save(imgByteArray, format="PNG")
+    return imgByteArray.getvalue()
 
 promptDict = {
     "scandinavian": "scandinavian forest cabin, log walls, reindeer hide rugs, northern wilderness escape",

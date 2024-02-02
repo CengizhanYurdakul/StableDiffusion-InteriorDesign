@@ -10,5 +10,5 @@ class StableDiffusionFactory:
             pipe.scheduler = UniPCMultistepScheduler.from_config(pipe.scheduler.config)
         else:
             raise Exception("Sorry, Stable Diffusion %s method not implemented yet!" % self.args.stableDiffusionModelName) 
-        
+        print("[StableDiffusion] - Variables initialized!")
         return pipe

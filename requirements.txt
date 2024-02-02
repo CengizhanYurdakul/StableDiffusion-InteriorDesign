@@ -1,1 +1,2 @@
 controlnet_aux==0.0.5
+ultralytics

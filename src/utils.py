@@ -113,7 +113,7 @@ def readImageFile(data:bytes) -> np.array:
         np.array: Converted image sent by the user
     """
     image = Image.open(BytesIO(data))
-    arrayImage = np.array(image)
+    arrayImage = cv2.cvtColor(np.array(image), cv2.COLOR_RGBA2RGB)
     return arrayImage
 
 def processImageToReturn(image:Image) -> bytes:
@@ -130,6 +130,25 @@ def processImageToReturn(image:Image) -> bytes:
     image.save(imgByteArray, format="PNG")
     return imgByteArray.getvalue()
 
+def checkInputForRoom(inputImage:np.array, detector) -> bool:
+    """
+    It performs detection in the image. It checks whether the detected classes are household items or not.
+
+    Args:
+        inputImage (np.array): It is the image in RGB format that the user gives as input.
+        detector (ultralytics.YOLO): Model taken from ultralytics.YOLO("yolov8n.pt")
+
+    Returns:
+        bool: True if there is an item in Image, False otherwise
+    """
+    outputs = detector(inputImage)
+    classes = outputs[0].boxes.cls
+    
+    for class_ in classes:
+        if class_ in furnitureClassList:
+            return True
+        
+    return False
 
 # Prompt dictionary with prompts mapped according to the user's desired style. 
 # When a new style is to be added, it should be added to this dictionary.
@@ -149,6 +168,9 @@ promptDict = {
     "retro": "retro 50s room, checkered floors, chrome accents, vinyl booth seating, nostalgic dining experience",
     "cozy": "cozy coastal cottage room, white walls, nautical decor, wicker furniture, seaside retreat",
 }
+
+# Class index list of household items in YOLO
+furnitureClassList = [56, 57, 58, 59, 60, 61, 62, 68, 69, 70, 71, 72, 73, 74, 78]
 
 # Using Enum-based class for input in FastAPI ensures type safety and restricts user choices
 # to predefined options, enhancing code clarity and reducing potential errors.

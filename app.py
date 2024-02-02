@@ -1,12 +1,14 @@
 import warnings
 warnings.filterwarnings("ignore")
 
+import io
 import random
 import argparse
 from fastapi import FastAPI, File, UploadFile
+from fastapi.responses import StreamingResponse
 
 from src.Processor import Processor
-from src.utils import Style, promptDict, readImageFile
+from src.utils import Style, promptDict, readImageFile, processImageToReturn
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--stableDiffusionModelName", default="sd1.5", help="Specifies the model to be used as a Stable Diffusion")
@@ -33,9 +35,11 @@ async def predict_api(file: UploadFile = File(...), style: Style = "random"):
     if not (extension in ["jpg", "JPG", "png", "PNG", "jpeg", "JPEG"]):
         return {"Error": "Extension must be [jpg, JPG, png, PNG, jpeg, JPEG"}
     
-    pilImage = readImageFile(await file.read())
-
-    return {"Done": "!!!"}
+    arrayImage = readImageFile(await file.read())
+    outputImage, controlnetImage = PROCESSOR.main(arrayImage, promptDict[style])
+    returnImage = processImageToReturn(outputImage)
+    
+    return StreamingResponse(io.BytesIO(returnImage), media_type="image/png")
 
 if __name__ == '__main__':
     import uvicorn

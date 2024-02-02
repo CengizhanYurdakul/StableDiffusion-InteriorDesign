@@ -23,4 +23,5 @@ class ControlNetFactory:
         else:
             raise Exception("Sorry, controlnet %s method not implemented yet!" % self.args.controlnetMethod)
         
+        print("[ControlNet] - Variables initialized!")
         return self.model

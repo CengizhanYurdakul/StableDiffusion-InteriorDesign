@@ -44,6 +44,23 @@ def processMLSD(inputImage:np.array, mlsdDetector) -> Image:
     mlsdImage = mlsdDetector(Image.fromarray(inputImage))
     return mlsdImage
 
+promptDict = {
+    "scandinavian": "scandinavian forest cabin, log walls, reindeer hide rugs, northern wilderness escape",
+    "hollywood": "Hollywood regency glamor, mirrored furniture, velvet upholstery, crystal chandeliers, classic elegance",
+    "victorian": "Victorian gothic, dark oak bookshelves, leather chesterfield sofas, ornate chandeliers, moody atmosphere",
+    "urban": "urban industrial room, exposed brick walls, polished concrete floors, minimalist decor, edison bulb lighting",
+    "coffeshop": "industrial chic room, coffee shop, repurposed factory equipment, reclaimed wood tables, exposed ductwork",
+    "cyberpunk": "cyberpunk underground room, neon lights, holographic art installations, retractable skylight, futuristic hideaway",
+    "nouveau": "art nouveau room, curved floral patterns, tiffany stained glass, elegance",
+    "egyptian": "Egyptian pharaoh's room, gold leaf accents, hieroglyphic murals, timeless royalty",
+    "french": "French provencal room, lavender fields color scheme, rustic farmhouse table, sunflower arrangements, country charm",
+    "moroccan": "Moroccan riad room, colorful zellige tiles, mosaic backsplash, open-concept layout, exotic",
+    "deco": "art deco penthouse room, sunburst patterns, gilded mirrors, crystal chandeliers, roaring twenties opulence",
+    "italian": "Italian room, pastel color scheme, gelato display cases, mosaic tile flooring",
+    "retro": "retro 50s room, checkered floors, chrome accents, vinyl booth seating, nostalgic dining experience",
+    "cozy": "cozy coastal cottage room, white walls, nautical decor, wicker furniture, seaside retreat",
+}
+
 palette = np.asarray([
     [0, 0, 0],
     [120, 120, 120],

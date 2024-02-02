@@ -19,11 +19,12 @@ class Processor:
         elif self.args.controlnetMethod == "segmentation":
             self.initSegmentationNetwork()
         elif self.args.controlnetMethod == "hed":
-            
             self.initHEDDetector()
         elif self.args.controlnetMethod == "mlsd":
-            
             self.initMLSDDetector()
+            
+        if self.args.checkInput:
+            self.initYOLODetector()
         
     def initVariables(self):
         """
@@ -34,6 +35,7 @@ class Processor:
         self.depthEstimator = None
         self.imageProcessor = None
         self.imageSegmentator = None
+        self.yoloDetector = None
         
         if self.args.dtype == "fp16":
             self.args.dtype = torch.float16
@@ -89,6 +91,14 @@ class Processor:
         self.mlsdDetector = MLSDdetector.from_pretrained('lllyasviel/ControlNet')
         print("[Processor] - MLSD initialized!")
         
+    def initYOLODetector(self):
+        """
+        Initialises the YOLO detector required for input image checking mechanism.
+        """
+        from ultralytics import YOLO
+        self.yoloDetector = YOLO("yolov8n.pt")
+        print("[Processor] - YOLO detector initialized!")
+    
     def processImage(self) -> Image:
         """
         Processes the input image according to the method to control the output with ControlNet.
@@ -140,8 +150,16 @@ class Processor:
         
         self.inputImage = inputImage
         
+        # Control of household items in input image
+        if self.args.checkInput:
+            imageFlag = checkInputForRoom(self.inputImage, self.yoloDetector)
+            if not imageFlag:
+                return None, {"Error": "No household items found in the photo!"}
+        
+        # Processing of the input image according to the ControlNet method
         processedImage = self.processImage()
         
+        # Stable Diffusion inference with input image and prompt
         outputImage = self.stableDiffusionModel(
             prompt,
             num_inference_steps=50,
@@ -149,4 +167,4 @@ class Processor:
             image=processedImage
             ).images[0]
         
-        return outputImage
+        return outputImage, {"Success": "Image was generated without any problems."}

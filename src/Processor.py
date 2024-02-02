@@ -34,41 +34,59 @@ class Processor:
         
         if self.args.dtype == "fp16":
             self.args.dtype = torch.float16
+        
+        print("[Processor] - Variables initialized!")
             
     def initControlNetModel(self):
         self.controlnetModel = ControlNetFactory(self.args).callModel()
+        print("[Processor] - Controlnet initialized!")
         
     def initStableDiffusionModel(self):
         self.stableDiffusionModel = StableDiffusionFactory(self.args).callModel(self.controlnetModel)
+        print("[Processor] - Stable Diffusion model initialized!")
         
     def initDepthEstimator(self):
         from transformers import pipeline
         self.depthEstimator = pipeline("depth-estimation")
+        print("[Processor] - Depth estimator initialized!")
     
     def initSegmentationNetwork(self):
         from transformers import AutoImageProcessor, UperNetForSemanticSegmentation
         self.imageProcessor = AutoImageProcessor.from_pretrained("openmmlab/upernet-convnext-small")
         self.imageSegmentator = UperNetForSemanticSegmentation.from_pretrained("openmmlab/upernet-convnext-small")
+        print("[Processor] - Segmentation model initialized!")
         
     def initHEDDetector(self):
         from controlnet_aux import HEDdetector
         self.hedDetector = HEDdetector.from_pretrained('lllyasviel/ControlNet')
+        print("[Processor] - HED initialized!")
         
     def initMLSDDetector(self):
         from controlnet_aux import MLSDdetector
         self.mlsdDetector = MLSDdetector.from_pretrained('lllyasviel/ControlNet')
+        print("[Processor] - MLSD initialized!")
         
     def processImage(self):
         if self.args.controlnetMethod == "canny":
-            return processCanny(self.inputImage)
+            cannyImage = processCanny(self.inputImage)
+            print("[Processor] - Image processed with canny!")
+            return cannyImage
         elif self.args.controlnetMethod == "segmentation":
-            return processSegmentation(self.inputImage, self.imageProcessor, self.imageSegmentator)
+            segmentImage = processSegmentation(self.inputImage, self.imageProcessor, self.imageSegmentator)
+            print("[Processor] - Image processed with segmentator!")
+            return segmentImage
         elif self.args.controlnetMethod == "depth":
-            return processDepth(self.inputImage, self.depthEstimator)
+            depthImage = processDepth(self.inputImage, self.depthEstimator)
+            print("[Processor] - Image processed with depth estimator!")
+            return depthImage
         elif self.args.controlnetMethod == "hed":
-            return processHED(self.inputImage, self.hedDetector)
+            hedImage = processHED(self.inputImage, self.hedDetector)
+            print("[Processor] - Image processed with HED!")
+            return hedImage
         elif self.args.controlnetMethod == "mlsd":
-            return processMLSD(self.inputImage, self.mlsdDetector)
+            mlsdImage = processMLSD(self.inputImage, self.mlsdDetector)
+            print("[Processor] - Image processed with MLSD!")
+            return mlsdImage
         else:
             raise Exception("Sorry, process for %s method not implemented yet!" % self.args.controlnetMethod)
         

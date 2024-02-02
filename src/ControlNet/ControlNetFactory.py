@@ -9,7 +9,8 @@ class ControlNetFactory:
     def callModel(self) -> ControlNetModel:
         """
         initialises the ControlNet model (downloads it if necessary) according 
-        to the method we specify from diffusers.ControlNetModel.
+        to the method we specify from diffusers.ControlNetModel. When a new method is added, 
+        its model initialization is implemented here.
 
         Raises:
             Exception: If you try to initialize a ControlNet method that has not been implemented 

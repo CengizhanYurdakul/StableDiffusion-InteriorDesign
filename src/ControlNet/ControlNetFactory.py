@@ -1,6 +1,3 @@
-import torch
-import numpy as np
-
 from diffusers import ControlNetModel
 
 class ControlNetFactory:
@@ -9,7 +6,19 @@ class ControlNetFactory:
         
         self.callModel()
     
-    def callModel(self):
+    def callModel(self) -> ControlNetModel:
+        """
+        initialises the ControlNet model (downloads it if necessary) according 
+        to the method we specify from diffusers.ControlNetModel.
+
+        Raises:
+            Exception: If you try to initialize a ControlNet method that has not been implemented 
+            before, you will end up here.
+
+        Returns:
+            ControlNetModel: ControlNet model built in accordance with the specified method
+        """
+        
         if self.args.controlnetMethod == "canny":
             self.model = ControlNetModel.from_pretrained("lllyasviel/sd-controlnet-canny", torch_dtype=self.args.dtype)
         elif self.args.controlnetMethod == "segmentation":

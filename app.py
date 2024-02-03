@@ -8,7 +8,7 @@ from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import StreamingResponse
 
 from src.Processor import Processor
-from src.utils import Style, promptDict, readImageFile, processImageToReturn
+from src.utils import Style, Color, promptDict, readImageFile, processImageToReturn
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--stableDiffusionModelName", default="sd1.5", help="Specifies the model to be used as a Stable Diffusion")
@@ -28,16 +28,14 @@ def home():
     return {"Interior Design App": "Cengizhan Yurdakul"}
 
 @app.post("/predict")
-async def predict_api(file: UploadFile = File(...), style: Style = "random"):
-    
+async def predict_api(file: UploadFile = File(...), style: Style = "random", color: Color = "none"):
     
     extension = file.filename.split(".")[-1]
     if not (extension in ["jpg", "JPG", "png", "PNG", "jpeg", "JPEG"]):
         return {"Error": "Extension must be [jpg, JPG, png, PNG, jpeg, JPEG"}
     
     arrayImage = readImageFile(await file.read())
-    # outputImage, status = PROCESSOR.main(arrayImage, promptDict[style])
-    outputImage, status = PROCESSOR.main(arrayImage, style)
+    outputImage, status = PROCESSOR.main(arrayImage, style, color)
     
     
     if outputImage is None:

@@ -139,7 +139,7 @@ class Processor:
         else:
             raise Exception("Sorry, process for %s method not implemented yet!" % self.args.controlnetMethod)
         
-    def main(self, inputImage:np.array, style:str) -> Image:
+    def main(self, inputImage:np.array, style:str, color:str) -> Image:
         """
         Processes the input image received from the user. It takes the style that comes as
         input from the prompt dictionary. It takes inference from Stable Diffusion model
@@ -148,6 +148,7 @@ class Processor:
         Args:
             inputImage (np.array): RGB format image received by the user
             style (str): It is the style chosen by the user
+            color (str): It is color chosen by the user
 
         Returns:
             Image: It is the image processed by the Stable Diffusion pipeline. It is returned in Image.PIL format.
@@ -172,9 +173,15 @@ class Processor:
         # Processing of the input image according to the ControlNet method
         processedImage = self.processImage()
         
+        # Color change prompt modification
+        prompt = promptDict[style]
+        if not color == "none":
+            logger.log("INFERENCE", "Color %s selected by user!" % color)
+            prompt += ", %s color furnitures" % color
+        
         # Stable Diffusion inference with input image and prompt
         outputImage = self.stableDiffusionModel(
-            promptDict[style],
+            prompt,
             num_inference_steps=50,
             generator=self.generator,
             image=processedImage

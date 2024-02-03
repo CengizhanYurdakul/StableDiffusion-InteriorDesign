@@ -190,6 +190,19 @@ class Style(str, Enum):
     italian = "italian"
     retro = "retro"
     cozy = "cozy"
+    
+# Using Enum-based class for color input in FastAPI 
+class Color(str, Enum):
+    none = "none"
+    red = "red"
+    green = "green"
+    blue = "blue"
+    yellow = "yellow"
+    gray = "gray"
+    black = "black"
+    pink = "pink"
+    purple = "purple"
+
 
 # The palette used for colouring the SemanticSegmentation output according to the classes.
 palette = np.asarray([

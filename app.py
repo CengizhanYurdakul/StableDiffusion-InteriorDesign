@@ -2,7 +2,6 @@ import warnings
 warnings.filterwarnings("ignore")
 
 import io
-import random
 import argparse
 from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import StreamingResponse

@@ -29,15 +29,16 @@ def home():
 
 @app.post("/predict")
 async def predict_api(file: UploadFile = File(...), style: Style = "random"):
-    if style == "random":
-        style = random.choice(list(promptDict.keys()))
+    
     
     extension = file.filename.split(".")[-1]
     if not (extension in ["jpg", "JPG", "png", "PNG", "jpeg", "JPEG"]):
         return {"Error": "Extension must be [jpg, JPG, png, PNG, jpeg, JPEG"}
     
     arrayImage = readImageFile(await file.read())
-    outputImage, status = PROCESSOR.main(arrayImage, promptDict[style])
+    # outputImage, status = PROCESSOR.main(arrayImage, promptDict[style])
+    outputImage, status = PROCESSOR.main(arrayImage, style)
+    
     
     if outputImage is None:
         return status

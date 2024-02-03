@@ -1,4 +1,5 @@
 import torch
+import random
 import numpy as np
 from loguru import logger
 logger.add("logs/file_{time}.log")
@@ -138,7 +139,7 @@ class Processor:
         else:
             raise Exception("Sorry, process for %s method not implemented yet!" % self.args.controlnetMethod)
         
-    def main(self, inputImage:np.array, prompt:str) -> Image:
+    def main(self, inputImage:np.array, style:str) -> Image:
         """
         Processes the input image received from the user. It takes the style that comes as
         input from the prompt dictionary. It takes inference from Stable Diffusion model
@@ -146,13 +147,20 @@ class Processor:
 
         Args:
             inputImage (np.array): RGB format image received by the user
-            prompt (str): It is the style chosen by the user
+            style (str): It is the style chosen by the user
 
         Returns:
             Image: It is the image processed by the Stable Diffusion pipeline. It is returned in Image.PIL format.
         """
         
         self.inputImage = inputImage
+        
+        # Style to prompt
+        if style == "random":
+            style = random.choice(list(promptDict.keys()))
+            logger.log("INFERENCE", "Random style selected by user given %s" % style)
+        else:
+            logger.log("INFERENCE", "%s style selected by user" % style)
         
         # Control of household items in input image
         if self.args.checkInput:
@@ -166,7 +174,7 @@ class Processor:
         
         # Stable Diffusion inference with input image and prompt
         outputImage = self.stableDiffusionModel(
-            prompt,
+            promptDict[style],
             num_inference_steps=50,
             generator=self.generator,
             image=processedImage

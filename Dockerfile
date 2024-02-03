@@ -10,3 +10,5 @@ RUN apt-get update
 RUN apt-get -y upgrade
 RUN apt-get update && apt-get install ffmpeg libsm6 libxext6 -y
 RUN pip install -r /app/requirements.txt
+
+ENTRYPOINT ["python", "/app/app.py"]

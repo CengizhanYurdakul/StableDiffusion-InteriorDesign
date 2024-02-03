@@ -15,7 +15,7 @@ parser.add_argument("--controlnetMethod", default="depth", help="[canny - segmen
 parser.add_argument("--dtype", default="fp16", help="[none - bf16 - fp16]Specifies which tensor type the models should be initialized")
 parser.add_argument("--host", default="0.0.0.0", help="Bind socket to this host.  [default:0.0.0.0]")
 parser.add_argument("--port", default=8000, help="Bind socket to this port. If 0, an available port will be picked.")
-parser.add_argument("--checkInput", default=False, help="A mechanism that checks whether the user input is a room or not using the YOLO detection model")
+parser.add_argument("--checkInput", action="store_true", help="A mechanism that checks whether the user input is a room or not using the YOLO detection model")
 args = parser.parse_args()
 
 app = FastAPI()

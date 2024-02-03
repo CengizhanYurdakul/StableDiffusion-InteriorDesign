@@ -1,5 +1,9 @@
 import torch
 import numpy as np
+from loguru import logger
+logger.add("logs/file_{time}.log")
+logger.level("INITIALIZE", no=38, color="<green>")
+logger.level("INFERENCE", no=38, color="<blue>")
 
 from src.utils import *
 from src.Diffusion.DiffusionFactory import StableDiffusionFactory
@@ -40,7 +44,7 @@ class Processor:
         if self.args.dtype == "fp16":
             self.args.dtype = torch.float16
         
-        print("[Processor] - Variables initialized!")
+        logger.log("INITIALIZE", "Processor variables initialized!")
             
     def initControlNetModel(self):
         """
@@ -48,7 +52,7 @@ class Processor:
         according to the method [canny - segmentation - depth - hed - mlsd] to be used.
         """
         self.controlnetModel = ControlNetFactory(self.args).callModel()
-        print("[Processor] - Controlnet initialized!")
+        logger.log("INITIALIZE",  "Processor ControlNet initialized!")
         
     def initStableDiffusionModel(self):
         """
@@ -56,7 +60,7 @@ class Processor:
         model according to the ControlNet method to be used.
         """
         self.stableDiffusionModel = StableDiffusionFactory(self.args).callModel(self.controlnetModel)
-        print("[Processor] - Stable Diffusion model initialized!")
+        logger.log("INITIALIZE",  "Processor Stable Diffusion model initialized!")
         
     def initDepthEstimator(self):
         """
@@ -64,7 +68,7 @@ class Processor:
         """
         from transformers import pipeline
         self.depthEstimator = pipeline("depth-estimation")
-        print("[Processor] - Depth estimator initialized!")
+        logger.log("INITIALIZE", "Processor Depth estimator initialized!")
     
     def initSegmentationNetwork(self):
         """
@@ -73,7 +77,7 @@ class Processor:
         from transformers import AutoImageProcessor, UperNetForSemanticSegmentation
         self.imageProcessor = AutoImageProcessor.from_pretrained("openmmlab/upernet-convnext-small")
         self.imageSegmentator = UperNetForSemanticSegmentation.from_pretrained("openmmlab/upernet-convnext-small")
-        print("[Processor] - Segmentation model initialized!")
+        logger.log("INITIALIZE", "Processor segmentation model initialized!")
         
     def initHEDDetector(self):
         """
@@ -81,7 +85,7 @@ class Processor:
         """
         from controlnet_aux import HEDdetector
         self.hedDetector = HEDdetector.from_pretrained('lllyasviel/ControlNet')
-        print("[Processor] - HED initialized!")
+        logger.log("INITIALIZE", "Processor HED initialized!")
         
     def initMLSDDetector(self):
         """
@@ -89,7 +93,7 @@ class Processor:
         """
         from controlnet_aux import MLSDdetector
         self.mlsdDetector = MLSDdetector.from_pretrained('lllyasviel/ControlNet')
-        print("[Processor] - MLSD initialized!")
+        logger.log("INITIALIZE", "Processor MLSD initialized!")
         
     def initYOLODetector(self):
         """
@@ -97,7 +101,7 @@ class Processor:
         """
         from ultralytics import YOLO
         self.yoloDetector = YOLO("yolov8n.pt")
-        print("[Processor] - YOLO detector initialized!")
+        logger.log("INITIALIZE", "Processor YOLO detector initialized!")
     
     def processImage(self) -> Image:
         """
@@ -113,23 +117,23 @@ class Processor:
         """
         if self.args.controlnetMethod == "canny":
             cannyImage = processCanny(self.inputImage)
-            print("[Processor] - Image processed with canny!")
+            logger.log("INFERENCE", "Image processed with canny!")
             return cannyImage
         elif self.args.controlnetMethod == "segmentation":
             segmentImage = processSegmentation(self.inputImage, self.imageProcessor, self.imageSegmentator)
-            print("[Processor] - Image processed with segmentator!")
+            logger.log("INFERENCE", "Image processed with segmentator!")
             return segmentImage
         elif self.args.controlnetMethod == "depth":
             depthImage = processDepth(self.inputImage, self.depthEstimator)
-            print("[Processor] - Image processed with depth estimator!")
+            logger.log("INFERENCE", "Image processed with depth estimator!")
             return depthImage
         elif self.args.controlnetMethod == "hed":
             hedImage = processHED(self.inputImage, self.hedDetector)
-            print("[Processor] - Image processed with HED!")
+            logger.log("INFERENCE", "Image processed with HED!")
             return hedImage
         elif self.args.controlnetMethod == "mlsd":
             mlsdImage = processMLSD(self.inputImage, self.mlsdDetector)
-            print("[Processor] - Image processed with MLSD!")
+            logger.log("INFERENCE", "Image processed with MLSD!")
             return mlsdImage
         else:
             raise Exception("Sorry, process for %s method not implemented yet!" % self.args.controlnetMethod)
@@ -154,6 +158,7 @@ class Processor:
         if self.args.checkInput:
             imageFlag = checkInputForRoom(self.inputImage, self.yoloDetector)
             if not imageFlag:
+                logger.log("INFERENCE", "No household items found in the photo!")
                 return None, {"Error": "No household items found in the photo!"}
         
         # Processing of the input image according to the ControlNet method
@@ -166,5 +171,5 @@ class Processor:
             generator=self.generator,
             image=processedImage
             ).images[0]
-        
-        return outputImage, {"Success": "Image was generated without any problems."}
+        logger.log("INFERENCE", "Image generated without any problems.")
+        return outputImage, {"Success": "Image generated without any problems."}

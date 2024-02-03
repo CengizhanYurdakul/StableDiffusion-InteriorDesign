@@ -44,6 +44,10 @@ class Processor:
         
         if self.args.dtype == "fp16":
             self.args.dtype = torch.float16
+        elif self.args.dtype == "bf16":
+            self.args.dtype = torch.bfloat16
+        elif self.args.dtype == "none":
+            self.args.dtype = None
         
         logger.log("INITIALIZE", "Processor variables initialized!")
             
